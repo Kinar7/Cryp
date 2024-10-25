@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34622.214
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cryp", "Cryp\Cryp.csproj", "{000EA023-6DC3-4FC6-8C2C-6BF858089CDF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{000EA023-6DC3-4FC6-8C2C-6BF858089CDF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{000EA023-6DC3-4FC6-8C2C-6BF858089CDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{000EA023-6DC3-4FC6-8C2C-6BF858089CDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{000EA023-6DC3-4FC6-8C2C-6BF858089CDF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B774D3E5-85A3-4A71-B3E6-A6090E3BA2C5}
+	EndGlobalSection
+EndGlobal
