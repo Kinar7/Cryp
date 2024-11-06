@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -34,14 +34,16 @@ namespace Cryp
 
         }
 
-        private void textBox4_TextChanged(object sender, EventArgs e) // Закртытый Ключ
+        private void textBox4_TextChanged(object sender, EventArgs e) // Закрытый ключ
         {
 
         }
+
         private void textBox5_TextChanged(object sender, EventArgs e)
         {
 
         }
+
         private void button1_Click(object sender, EventArgs e) // Для Зашифровывания
         {
             string inputText = textBox1.Text;
@@ -89,6 +91,9 @@ namespace Cryp
                             return;
                         }
                         break;
+                    case "Binary":
+                        outText = BinaryEncrypt(inputText); // Для двоичного шифрования
+                        break;
                     default:
                         MessageBox.Show("Выберите шифр");
                         return;
@@ -101,7 +106,7 @@ namespace Cryp
             }
         }
 
-        private void button2_Click(object sender, EventArgs e) // Дешифрованние
+        private void button2_Click(object sender, EventArgs e) // Дешифрование
         {
             string inputText = textBox1.Text;
             string keyText = textBox3.Text;
@@ -148,6 +153,9 @@ namespace Cryp
                             return;
                         }
                         break;
+                    case "Binary":
+                        outText = BinaryDecrypt(inputText); // Для двоичного дешифрования
+                        break;
                     default:
                         MessageBox.Show("Выберите шифр");
                         return;
@@ -183,10 +191,10 @@ namespace Cryp
             }
         }
 
-        private void Form1_Load(object sender, EventArgs e) // Что будет происходить при запуске программы.
+        private void Form1_Load(object sender, EventArgs e) // Что будет происходить при запуске программы
         {
             comboBoxCrypt.Items.AddRange(new string[] {
-                "AES", "RSA", "SHA", "Cesar"
+                "AES", "RSA", "SHA", "Cesar", "Binary" // Добавили "Binary"
             });
             comboBoxCrypt.SelectedIndex = 0;
             comboBoxCrypt_SelectedIndexChanged(sender, e);
@@ -206,7 +214,7 @@ namespace Cryp
             const string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" +
                                     "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ" +
                                     "абвгдеёжзийклмнопрстуфхцчшщъыьэюя";
-            int en = alphabet.Length; // отвечает за длину всего алфавита
+            int en = alphabet.Length;
             foreach (char c in input)
             {
                 int index = alphabet.IndexOf(c);
@@ -226,10 +234,10 @@ namespace Cryp
             }
             return sb.ToString();
         }
+
         private string CesarDecrypt(string input, int key)
         {
-            
-            return CesarEncrypt(input,-1); 
+            return CesarEncrypt(input, -key);
         }
 
         private string RSAEncrypt(string plainText, string publicKey)
@@ -254,16 +262,16 @@ namespace Cryp
             return Encoding.UTF8.GetString(decryptedData);
         }
 
-
         private void GenerateRSAKeys(out string publicKey, out string privateKey)
         {
             using (RSACryptoServiceProvider rsa = new RSACryptoServiceProvider(2048))
             {
-                publicKey = Convert.ToBase64String(rsa.ExportCspBlob(false)); // открытый ключ
-                privateKey = Convert.ToBase64String(rsa.ExportCspBlob(true)); // закрытый ключ
+                publicKey = Convert.ToBase64String(rsa.ExportCspBlob(false));
+                privateKey = Convert.ToBase64String(rsa.ExportCspBlob(true));
             }
         }
-        private string AESEncrypt(string cipherText, string privatePassword)
+
+        private string AESEncrypt(string plainText, string privatePassword)
         {
             byte[] encryptedData;
 
@@ -281,14 +289,12 @@ namespace Cryp
 
                 ICryptoTransform cryptor = aes.CreateEncryptor(aes.Key, aes.IV);
 
-                byte[] cipherBytes = Convert.FromBase64String(cipherText);
-
                 using (MemoryStream ms = new MemoryStream())
                 {
                     using (CryptoStream cryptoStream = new CryptoStream(ms, cryptor, CryptoStreamMode.Write))
                     using (StreamWriter sw = new StreamWriter(cryptoStream, Encoding.UTF8))
                     {
-                        sw.Write(cipherText);
+                        sw.Write(plainText);
                     }
                     encryptedData = ms.ToArray();
                 }
@@ -296,6 +302,7 @@ namespace Cryp
                 return Convert.ToBase64String(encryptedData);
             }
         }
+
         private string AESDecrypt(string cipherText, string privatePassword)
         {
             string text = null;
@@ -314,9 +321,7 @@ namespace Cryp
 
                 ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
 
-                byte[] cipherBytes = Convert.FromBase64String(cipherText);
-
-                using (MemoryStream ms = new MemoryStream(cipherBytes))
+                using (MemoryStream ms = new MemoryStream(Convert.FromBase64String(cipherText)))
                 {
                     using (CryptoStream cryptoStream = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
                     using (StreamReader sr = new StreamReader(cryptoStream, Encoding.UTF8))
@@ -333,15 +338,47 @@ namespace Cryp
         {
             using (SHA256 sha256 = SHA256.Create())
             {
-                byte[] bytes = Encoding.UTF8.GetBytes(input);
-                byte[] hashBytes = sha256.ComputeHash(bytes);
-                StringBuilder sb = new StringBuilder();
-                foreach (byte b in hashBytes)
-                {
-                    sb.Append(b.ToString("x2"));
-                }
-                return sb.ToString();
+                byte[] hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(input));
+                return BitConverter.ToString(hash).Replace("-", "").ToLower();
             }
         }
+
+        // Метод для двоичного шифрования с поддержкой UTF-8
+        private string BinaryEncrypt(string input)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(input);
+            StringBuilder binaryString = new StringBuilder();
+
+            foreach (byte b in bytes)
+            {
+                binaryString.Append(Convert.ToString(b, 2).PadLeft(8, '0') + " ");
+            }
+
+            return binaryString.ToString().Trim();
+        }
+
+        // Метод для двоичного дешифрования с поддержкой UTF-8
+        private string BinaryDecrypt(string binaryInput)
+        {
+            string[] binaryValues = binaryInput.Trim().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            List<byte> byteList = new List<byte>();
+
+            foreach (string binary in binaryValues)
+            {
+                if (binary.Length == 8 && binary.All(c => c == '0' || c == '1'))
+                {
+                    byteList.Add(Convert.ToByte(binary, 2));
+                }
+                else
+                {
+                    MessageBox.Show("Ошибка формата: каждый символ должен быть представлен как 8-битное двоичное число, разделенное пробелами.");
+                    return string.Empty;
+                }
+            }
+
+            return Encoding.UTF8.GetString(byteList.ToArray());
+        }
+
+
     }
 }
